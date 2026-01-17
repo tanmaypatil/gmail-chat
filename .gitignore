@@ -205,3 +205,9 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Gmail Chat App - Sensitive files
+backend/credentials.json
+backend/token.json
+backend/.env
+.anthropic_api_key

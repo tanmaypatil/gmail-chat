@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gmail Chat - AI Assistant</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Gmail Chat Assistant</h1>
+            <p class="subtitle">Ask questions about your Gmail using natural language</p>
+        </header>
+
+        <div class="chat-container">
+            <div id="chatMessages" class="chat-messages">
+                <div class="message bot-message">
+                    <div class="message-content">
+                        <p>Hello! I'm your Gmail assistant. You can ask me questions like:</p>
+                        <ul>
+                            <li>"What is the aadhar number of Tanmay Patil?"</li>
+                            <li>"Search and summarize emails from yesterday"</li>
+                            <li>"Find emails with attachments from last week"</li>
+                            <li>"Show me emails about invoices"</li>
+                        </ul>
+                        <p>I can also help you download attachments from emails!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-container">
+                <textarea
+                    id="messageInput"
+                    placeholder="Ask a question about your Gmail..."
+                    rows="1"
+                ></textarea>
+                <button id="sendButton" onclick="sendMessage()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <footer>
+            <p>Powered by Claude AI & Gmail API</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
