@@ -208,6 +208,7 @@ __marimo__/
 
 # Gmail Chat App - Sensitive files
 backend/credentials.json
+backend/credentials_web.json
 backend/token.json
 backend/.env
 .anthropic_api_key
