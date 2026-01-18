@@ -9,8 +9,16 @@
 <body>
     <div class="container">
         <header>
-            <h1>Gmail Chat Assistant</h1>
-            <p class="subtitle">Ask questions about your Gmail using natural language</p>
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>Gmail Chat Assistant</h1>
+                    <p class="subtitle">Ask questions about your Gmail using natural language</p>
+                </div>
+                <div class="header-user">
+                    <span id="userEmail" class="user-email"></span>
+                    <button id="logoutBtn" class="logout-btn" onclick="logout()">Sign Out</button>
+                </div>
+            </div>
         </header>
 
         <div class="chat-container">

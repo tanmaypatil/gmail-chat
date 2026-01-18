@@ -2,6 +2,58 @@
 
 const API_BASE_URL = 'http://localhost:5001';
 
+// Check authentication on page load and redirect to login if not authenticated
+async function checkAuthAndRedirect() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/user`, {
+            credentials: 'include'
+        });
+
+        const data = await response.json();
+
+        if (!data.authenticated) {
+            // Not logged in, redirect to login
+            window.location.href = 'login.html';
+            return;
+        }
+
+        // Display user email
+        const userEmailSpan = document.getElementById('userEmail');
+        if (userEmailSpan) {
+            userEmailSpan.textContent = data.email;
+        }
+
+    } catch (error) {
+        console.error('Auth check failed:', error);
+        // Backend not running or error, redirect to login
+        window.location.href = 'login.html';
+    }
+}
+
+// Logout function
+async function logout() {
+    try {
+        await fetch(`${API_BASE_URL}/auth/logout`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+    } catch (error) {
+        console.error('Logout error:', error);
+    }
+
+    // Redirect to login page regardless of response
+    window.location.href = 'login.html';
+}
+
+// Handle 401 responses by redirecting to login
+function handleAuthError(response) {
+    if (response.status === 401) {
+        window.location.href = 'login.html';
+        return true;
+    }
+    return false;
+}
+
 // Auto-resize textarea
 const messageInput = document.getElementById('messageInput');
 messageInput.addEventListener('input', function() {
@@ -45,8 +97,14 @@ async function sendMessage() {
             headers: {
                 'Content-Type': 'application/json'
             },
+            credentials: 'include',
             body: JSON.stringify({ message })
         });
+
+        // Handle authentication errors
+        if (handleAuthError(response)) {
+            return;
+        }
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -204,12 +262,18 @@ async function downloadAttachment(messageId, attachmentId, filename) {
             headers: {
                 'Content-Type': 'application/json'
             },
+            credentials: 'include',
             body: JSON.stringify({
                 message_id: messageId,
                 attachment_id: attachmentId,
                 filename: filename
             })
         });
+
+        // Handle authentication errors
+        if (handleAuthError(response)) {
+            return;
+        }
 
         if (!response.ok) {
             throw new Error('Failed to download attachment');
@@ -236,7 +300,9 @@ async function downloadAttachment(messageId, attachmentId, filename) {
 // Check backend health on load
 async function checkBackendHealth() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/health`);
+        const response = await fetch(`${API_BASE_URL}/api/health`, {
+            credentials: 'include'
+        });
         if (response.ok) {
             console.log('Backend is healthy');
         }
@@ -251,7 +317,11 @@ async function checkBackendHealth() {
 }
 
 // Initialize
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
+    // First check authentication - will redirect to login if not authenticated
+    await checkAuthAndRedirect();
+
+    // Only run these if still on this page (not redirected)
     checkBackendHealth();
     document.getElementById('messageInput').focus();
 });

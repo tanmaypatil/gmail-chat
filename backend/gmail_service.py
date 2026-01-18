@@ -1,6 +1,6 @@
 """
 Gmail Service Module
-Handles Gmail API authentication and operations
+Handles Gmail API operations
 """
 
 import os
@@ -12,7 +12,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-# Gmail API scopes
+# Gmail API scopes (kept for backwards compatibility with desktop flow)
 SCOPES = [
     'https://www.googleapis.com/auth/gmail.readonly',
     'https://www.googleapis.com/auth/gmail.modify'
@@ -20,15 +20,42 @@ SCOPES = [
 
 
 class GmailService:
-    def __init__(self, credentials_file='credentials.json', token_file='token.json'):
-        """Initialize Gmail service with authentication"""
+    def __init__(self, credentials=None, credentials_file='credentials.json', token_file='token.json'):
+        """
+        Initialize Gmail service
+
+        Args:
+            credentials: Pre-authenticated Google credentials (for web OAuth flow)
+            credentials_file: Path to credentials.json (for desktop flow, backwards compatible)
+            token_file: Path to token.json (for desktop flow, backwards compatible)
+        """
         self.credentials_file = credentials_file
         self.token_file = token_file
         self.service = None
-        self.authenticate()
+
+        if credentials:
+            # Use provided credentials (web OAuth flow)
+            self.service = build('gmail', 'v1', credentials=credentials)
+            print("Gmail API initialized with provided credentials")
+        else:
+            # Backwards compatible: auto-authenticate with desktop flow
+            self.authenticate()
+
+    @classmethod
+    def from_credentials(cls, credentials):
+        """
+        Create a GmailService instance from existing OAuth credentials
+
+        Args:
+            credentials: Google OAuth2 credentials object
+
+        Returns:
+            GmailService instance
+        """
+        return cls(credentials=credentials)
 
     def authenticate(self):
-        """Authenticate with Gmail API using OAuth 2.0"""
+        """Authenticate with Gmail API using OAuth 2.0 (desktop flow)"""
         creds = None
 
         # Check if token.json exists (previously authenticated)
@@ -55,7 +82,7 @@ class GmailService:
                 token.write(creds.to_json())
 
         self.service = build('gmail', 'v1', credentials=creds)
-        print("Gmail API authenticated successfully")
+        print("Gmail API authenticated successfully (desktop flow)")
 
     def search_emails(self, query, max_results=10):
         """
