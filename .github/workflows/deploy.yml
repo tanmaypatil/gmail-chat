@@ -7,7 +7,7 @@ on:
 
 env:
   AWS_REGION: ap-south-1  # Change to your region
-  INSTANCE_NAME: gmail-chat
+  INSTANCE_NAME: Ubuntu-1
 
 jobs:
   deploy:
