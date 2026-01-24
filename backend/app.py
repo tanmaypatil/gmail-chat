@@ -404,7 +404,7 @@ def health():
     """Health check endpoint"""
     if request.method == 'OPTIONS':
         return '', 200
-    return jsonify({"status": "ok", "service": "gmail-chat-backend"})
+    return jsonify({"status": "ok", "service": "gmail-chat-backend", "version": "1.0.0"})
 
 
 if __name__ == '__main__':
