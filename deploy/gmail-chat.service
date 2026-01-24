@@ -1,0 +1,15 @@
+[Unit]
+Description=Gmail Chat Flask Application
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/var/www/gmail-chat
+Environment="PATH=/var/www/gmail-chat/venv/bin"
+EnvironmentFile=/var/www/gmail-chat/.env
+ExecStart=/var/www/gmail-chat/venv/bin/gunicorn --workers 2 --bind 127.0.0.1:5001 app:app
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,69 @@
+name: Deploy to Lightsail
+
+on:
+  push:
+    branches: [release]
+  workflow_dispatch:  # Allow manual trigger from any branch
+
+env:
+  AWS_REGION: ap-south-1  # Change to your region
+  INSTANCE_NAME: gmail-chat
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Verify AWS connection
+        run: |
+          aws lightsail get-instance --instance-name ${{ env.INSTANCE_NAME }} --query 'instance.state.name' --output text
+
+      - name: Deploy to Lightsail
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ubuntu
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          script: |
+            set -e
+
+            echo "=== Pulling latest code ==="
+            cd ~/gmail-chat
+            git fetch origin release
+            git reset --hard origin/release
+
+            echo "=== Updating application ==="
+            cp -r backend/* /var/www/gmail-chat/
+            cp -r frontend/* /var/www/gmail-chat/static/
+
+            echo "=== Installing dependencies ==="
+            cd /var/www/gmail-chat
+            source venv/bin/activate
+            pip install -r requirements.txt --quiet
+
+            echo "=== Restarting service ==="
+            sudo systemctl restart gmail-chat
+
+            echo "=== Deployment complete ==="
+            sudo systemctl status gmail-chat --no-pager
+
+      - name: Health check
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ubuntu
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          script: |
+            sleep 5
+            curl -f http://localhost:5001/api/health || exit 1
+            echo "Health check passed!"
