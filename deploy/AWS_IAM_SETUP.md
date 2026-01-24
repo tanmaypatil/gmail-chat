@@ -11,12 +11,14 @@
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "LightsailReadAccess",
+            "Sid": "LightsailAccess",
             "Effect": "Allow",
             "Action": [
                 "lightsail:GetInstance",
                 "lightsail:GetInstanceState",
-                "lightsail:GetInstances"
+                "lightsail:GetInstances",
+                "lightsail:StartInstance",
+                "lightsail:StopInstance"
             ],
             "Resource": "*"
         }

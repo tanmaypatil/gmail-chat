@@ -1,0 +1,72 @@
+name: Manage Lightsail Instance
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        type: choice
+        options:
+          - stop
+          - start
+          - status
+
+env:
+  AWS_REGION: ap-south-1
+  INSTANCE_NAME: gmail-chat
+
+jobs:
+  manage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Stop Instance
+        if: ${{ github.event.inputs.action == 'stop' }}
+        run: |
+          echo "Stopping instance: ${{ env.INSTANCE_NAME }}"
+          aws lightsail stop-instance --instance-name ${{ env.INSTANCE_NAME }}
+          echo "✅ Instance stop initiated"
+          echo ""
+          echo "Instance will be stopped. You will NOT be charged for compute while stopped."
+          echo "Storage charges (~$0.05/GB/month) still apply."
+
+      - name: Start Instance
+        if: ${{ github.event.inputs.action == 'start' }}
+        run: |
+          echo "Starting instance: ${{ env.INSTANCE_NAME }}"
+          aws lightsail start-instance --instance-name ${{ env.INSTANCE_NAME }}
+          echo "✅ Instance start initiated"
+          echo ""
+          echo "Waiting for instance to be running..."
+          sleep 30
+
+          # Get instance state
+          STATE=$(aws lightsail get-instance --instance-name ${{ env.INSTANCE_NAME }} --query 'instance.state.name' --output text)
+          echo "Instance state: $STATE"
+
+          # Get public IP
+          IP=$(aws lightsail get-instance --instance-name ${{ env.INSTANCE_NAME }} --query 'instance.publicIpAddress' --output text)
+          echo "Public IP: $IP"
+          echo ""
+          echo "🌐 Your app should be available at: https://germanwakad.click"
+
+      - name: Check Status
+        if: ${{ github.event.inputs.action == 'status' }}
+        run: |
+          echo "=== Instance Status ==="
+          aws lightsail get-instance --instance-name ${{ env.INSTANCE_NAME }} --query '{
+            Name: instance.name,
+            State: instance.state.name,
+            PublicIP: instance.publicIpAddress,
+            Blueprint: instance.blueprintId,
+            Bundle: instance.bundleId,
+            Zone: instance.location.availabilityZone
+          }' --output table
