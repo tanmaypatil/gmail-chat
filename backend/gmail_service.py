@@ -239,6 +239,10 @@ class GmailService:
                     has_attachments = True
                     attachment_count += 1
 
+        # Truncate body to prevent exceeding Claude's token limit
+        max_body_length = 2000  # ~500 tokens per email
+        truncated_body = body[:max_body_length] + '...' if len(body) > max_body_length else body
+
         return {
             'id': message['id'],
             'threadId': message['threadId'],
@@ -246,7 +250,7 @@ class GmailService:
             'from': sender,
             'to': to,
             'date': date,
-            'body': body,
+            'body': truncated_body,
             'snippet': message.get('snippet', ''),
             'hasAttachments': has_attachments,
             'attachmentCount': attachment_count
