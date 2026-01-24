@@ -13,18 +13,24 @@ fi
 
 echo "=== Initial Server Setup for CI/CD ==="
 
-# Update system
+# Update system (non-interactive to avoid prompts)
 echo "[1/6] Updating system..."
-sudo apt update && sudo apt upgrade -y
+sudo DEBIAN_FRONTEND=noninteractive apt update
+sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y
 
 # Install dependencies
 echo "[2/6] Installing dependencies..."
-sudo apt install -y python3 python3-pip python3-venv nginx git
+sudo DEBIAN_FRONTEND=noninteractive apt install -y python3 python3-pip python3-venv nginx git
 
-# Clone repository
+# Clone repository (skip if already exists)
 echo "[3/6] Cloning repository..."
 cd ~
-git clone $REPO_URL gmail-chat
+if [ -d "gmail-chat" ]; then
+    echo "Repository already exists, pulling latest..."
+    cd gmail-chat && git pull origin main && cd ~
+else
+    git clone $REPO_URL gmail-chat
+fi
 
 # Setup application directory
 echo "[4/6] Setting up application..."
