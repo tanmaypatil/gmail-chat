@@ -1,6 +1,6 @@
 // Authentication JavaScript for Login Page
 
-const API_BASE_URL = 'http://localhost:5001';
+const API_BASE_URL = '';
 
 // Check if user is already authenticated on page load
 async function checkAuth() {
