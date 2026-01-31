@@ -33,19 +33,26 @@ app = Flask(__name__)
 # Generate a secret key for Flask sessions if not provided
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', secrets.token_hex(32))
 
+# Get base URL from environment (for production) or use localhost (for development)
+BASE_URL = os.environ.get('BASE_URL', 'http://localhost:5001')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:8000')
+
+# OAuth redirect URI
+OAUTH_REDIRECT_URI = f"{BASE_URL}/auth/callback"
+
 # Enable CORS with credentials support for session cookies
+cors_origins = ['http://localhost:8000', 'http://127.0.0.1:8000']
+if FRONTEND_URL not in cors_origins:
+    cors_origins.append(FRONTEND_URL)
+
 CORS(app,
      supports_credentials=True,
-     origins=['http://localhost:8000', 'http://127.0.0.1:8000'],
+     origins=cors_origins,
      allow_headers=['Content-Type'],
      methods=['GET', 'POST', 'OPTIONS'])
 
 # Initialize Anthropic client
 anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
-
-# OAuth redirect URI
-OAUTH_REDIRECT_URI = 'http://localhost:5001/auth/callback'
-FRONTEND_URL = 'http://localhost:8000'
 
 # Define tools for Claude to use
 TOOLS = [
